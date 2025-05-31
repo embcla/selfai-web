@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Function to check if a value is likely encrypted
+is_likely_encrypted() {
+    local value="$1"
+    
+    # Check if value is empty
+    if [ -z "$value" ]; then
+        return 1
+    fi
+    
+    # Try to decode as base64
+    if ! echo "$value" | base64 -d >/dev/null 2>&1; then
+        return 1
+    fi
+    
+    # Check if the decoded content starts with 'Salted__' (OpenSSL salt marker)
+    if ! echo "$value" | base64 -d | head -c 8 | grep -q '^Salted__'; then
+        return 1
+    fi
+    
+    return 0
+}
+
+# Function to extract values from terraform.tfvars
+extract_tfvars_values() {
+    local file="$1"
+    local values=()
+    
+    # Extract values from key = "value" pairs
+    while IFS= read -r line; do
+        if [[ $line =~ ^[[:space:]]*[^#][^=]*=[[:space:]]*\"(.*)\" ]]; then
+            values+=("${BASH_REMATCH[1]}")
+        fi
+    done < "$file"
+    
+    echo "${values[@]}"
+}
+
+# Check terraform.tfvars for encrypted values
+check_tfvars_file() {
+    local file="terraform.tfvars"
+    
+    if [ ! -f "$file" ]; then
+        echo "Error: terraform.tfvars not found"
+        return 1
+    fi
+    
+    local unencrypted=()
+    local values=($(extract_tfvars_values "$file"))
+    
+    for value in "${values[@]}"; do
+        if ! is_likely_encrypted "$value"; then
+            unencrypted+=("$value")
+        fi
+    done
+    
+    if [ ${#unencrypted[@]} -gt 0 ]; then
+        echo "Error: Found unencrypted values in terraform.tfvars:"
+        printf '%s\n' "${unencrypted[@]}"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Main check
+if ! check_tfvars_file; then
+    echo "Error: terraform.tfvars contains unencrypted values"
+    echo "Please encrypt all values before committing"
+    exit 1
+fi
+
+exit 0 

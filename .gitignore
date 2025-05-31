@@ -1,0 +1,12 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Encrypted files and keys
+.terraform-keys/
+.terraform-encrypted/
+
+# SSH keys
+selfai_ssh_key
+selfai_ssh_key.pub 
