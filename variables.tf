@@ -11,6 +11,6 @@ variable "cloudflare_api_token" {
 }
 
 variable "cloudflare_zone_id" {
-  description = "Cloudflare Zone ID for meco.cfd"
+  description = "Cloudflare Zone ID"
   type        = string
 } 

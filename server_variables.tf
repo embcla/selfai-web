@@ -1,7 +1,7 @@
 variable "server_image" {
   description = "Server image to use"
   type        = string
-  default     = "ubuntu-22.04"
+  default     = "ubuntu-24.04"
 }
 
 variable "server_type" {

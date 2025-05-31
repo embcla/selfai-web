@@ -10,5 +10,5 @@ output "ssh_command" {
 
 output "domain" {
   description = "Domain name for the server"
-  value       = "selfai.meco.cfd"
+  value       = "selfai.domain"
 } 
