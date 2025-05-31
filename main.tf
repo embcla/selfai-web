@@ -8,10 +8,6 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 4.0"
     }
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.4.0"
-    }
   }
 }
 
@@ -48,13 +44,50 @@ resource "hcloud_ssh_key" "default" {
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
-# Create Hetzner Cloud server
-resource "hcloud_server" "main" {
-  name        = "selfai"
-  image       = var.server_image
-  server_type = var.server_type
-  location    = var.server_location
+# Create Hetzner Cloud frontend server
+resource "hcloud_server" "frontend" {
+  name        = "frontend"
+  image       = var.frontend_image
+  server_type = var.frontend_type
+  location    = var.frontend_location
   ssh_keys    = [hcloud_ssh_key.default.id]
+  labels = {
+    group       = "selfai"
+    role        = "frontend"
+    environment = "production"
+    managed-by  = "terraform"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "apt-get update",
+      "apt-get install -y docker.io docker-compose",
+      "systemctl enable docker",
+      "systemctl start docker"
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      private_key = tls_private_key.ssh_key.private_key_openssh
+      host        = self.ipv4_address
+    }
+  }
+}
+
+# Create Hetzner Cloud vector db server
+resource "hcloud_server" "vectordb" {
+  name        = "vectordb"
+  image       = var.vectordb_image
+  server_type = var.vectordb_type
+  location    = var.vectordb_location
+  ssh_keys    = [hcloud_ssh_key.default.id]
+  labels = {
+    group       = "selfai"
+    role        = "vectordb"
+    environment = "production"
+    managed-by  = "terraform"
+  }
 
   provisioner "remote-exec" {
     inline = [
@@ -77,7 +110,7 @@ resource "hcloud_server" "main" {
 resource "cloudflare_record" "dns" {
   zone_id = var.cloudflare_zone_id
   name    = "selfai"
-  value   = hcloud_server.main.ipv4_address
+  value   = hcloud_server.frontend.ipv4_address
   type    = "A"
   ttl     = 1
   proxied = true
