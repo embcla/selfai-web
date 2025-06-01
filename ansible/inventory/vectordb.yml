@@ -1,0 +1,11 @@
+all:
+  children:
+    vectordb:
+      hosts:
+        vectordb:
+          ansible_host: "{{ lookup('env', 'VECTORDB_IP') }}"
+          ansible_user: root
+          ansible_ssh_private_key_file: "{{ playbook_dir }}/../selfai_ssh_key"
+          ansible_python_interpreter: /usr/bin/python3
+          server_role: vectordb
+          server_group: selfai

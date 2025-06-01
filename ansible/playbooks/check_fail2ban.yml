@@ -1,0 +1,33 @@
+---
+- name: Check fail2ban status and logs
+  hosts: selfai
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Get fail2ban status
+      command: fail2ban-client status
+      register: fail2ban_status
+      changed_when: false
+
+    - name: Display fail2ban status
+      debug:
+        var: fail2ban_status.stdout_lines
+
+    - name: Get fail2ban logs
+      command: tail -n 50 /var/log/fail2ban.log
+      register: fail2ban_logs
+      changed_when: false
+
+    - name: Display fail2ban logs
+      debug:
+        var: fail2ban_logs.stdout_lines
+
+    - name: Get banned IPs
+      command: fail2ban-client status sshd
+      register: banned_ips
+      changed_when: false
+
+    - name: Display banned IPs
+      debug:
+        var: banned_ips.stdout_lines

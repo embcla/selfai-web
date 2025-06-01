@@ -1,0 +1,75 @@
+---
+- name: Set up fail2ban for SSH protection
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Test Python availability
+      raw: python3 --version
+      register: python_version
+      changed_when: false
+
+    - name: Show Python version
+      debug:
+        var: python_version.stdout_lines
+
+    - name: Test pip availability
+      raw: pip3 --version
+      register: pip_version
+      changed_when: false
+
+    - name: Show pip version
+      debug:
+        var: pip_version.stdout_lines
+
+    - name: Install fail2ban
+      raw: apt-get update && apt-get install -y fail2ban
+      register: install_result
+
+    - name: Show installation result
+      debug:
+        var: install_result.stdout_lines
+
+    - name: Create jail.local configuration
+      copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+          [DEFAULT]
+          bantime = 3600
+          findtime = 600
+          maxretry = 3
+          destemail = root@localhost
+          sender = fail2ban@localhost
+          action = %(action_mwl)s
+
+          [sshd]
+          enabled = true
+          port = ssh
+          filter = sshd
+          logpath = /var/log/auth.log
+          maxretry = 3
+          findtime = 600
+          bantime = 3600
+          ignoreip = 127.0.0.1/8 ::1
+      register: config_result
+
+    - name: Show configuration result
+      debug:
+        var: config_result
+
+    - name: Restart fail2ban service
+      raw: systemctl restart fail2ban
+      register: restart_result
+
+    - name: Show restart result
+      debug:
+        var: restart_result
+
+    - name: Check fail2ban status
+      raw: fail2ban-client status
+      register: status_result
+
+    - name: Show fail2ban status
+      debug:
+        var: status_result.stdout_lines
