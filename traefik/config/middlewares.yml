@@ -1,0 +1,51 @@
+http:
+  middlewares:
+    #security-headers:
+    #  headers:
+    #    browserXssFilter: true
+    #    contentTypeNosniff: true
+    #    frameDeny: true
+    #    sslRedirect: true
+    #    stsIncludeSubdomains: true
+    #    stsPreload: true
+    #    stsSeconds: 31536000
+    #    customFrameOptionsValue: "SAMEORIGIN"
+    #    customResponseHeaders:
+    #      X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex"
+    #      server: ""
+    #    accessControlAllowMethods:
+    #      - GET
+    #      - POST
+    #      - PUT
+    #      - DELETE
+    #      - PATCH
+    #      - OPTIONS
+    #    accessControlAllowOriginList:
+    #      - "*"
+    #    accessControlMaxAge: 100
+    #    addVaryHeader: true
+    #    allowedHosts:
+    #      - "*"
+    #    hostsProxyHeaders:
+    #      - "X-Forwarded-Host"
+    #    sslHost: "example.com"
+    #    forceSTSHeader: true
+    #    stsSeconds: 31536000
+    #    stsIncludeSubdomains: true
+    #    stsPreload: true
+
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+        period: 1s
+
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    traefik-auth:
+      basicAuth:
+        users:
+          - "trfkadm:password123"

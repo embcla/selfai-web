@@ -118,11 +118,11 @@ module "provision_ansible_on_frontend" {
 #}
 
 # Outputs
-#output "frontend_ip" {
-#  description = "Public IP address of the frontend server"
-#  value       = module.frontend.server_ipv4
-#}
-#
+output "frontend_ip" {
+  description = "Public IP address of the frontend server"
+  value       = module.frontend.server_ipv4
+}
+
 #output "vectordb_ip" {
 #  description = "Public IP address of the vector db server"
 #  value       = module.vectordb.server_ipv4
