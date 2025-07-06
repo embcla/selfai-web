@@ -5,6 +5,19 @@ resource "hcloud_server" "server" {
   location    = var.server_location
   ssh_keys    = [var.root_ssh_key_id]
 
+  user_data = <<EOF
+#cloud-config
+runcmd:
+  - ['sh', '-c', 'curl -fsSL https://tailscale.com/install.sh | sh']
+  - tailscale up --authkey ${var.tailnet_key} --accept-routes --accept-dns --ssh
+EOF
+
+  lifecycle {
+    ignore_changes = [
+      user_data
+    ]
+  }
+
   labels = {
     group       = "selfai"
     role        = var.server_role

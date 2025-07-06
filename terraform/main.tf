@@ -8,15 +8,24 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 4.0"
     }
+    tailscale = {
+      source  = "tailscale/tailscale"
+      version = "~> 0.16.1"
+    }
   }
 }
 
+provider "tailscale" {
+  oauth_client_id     = var.ts_client_token
+  oauth_client_secret = var.ts_client_secret
+}
+
 provider "hcloud" {
-  token = var.hcloud_token
+  token               = var.hcloud_token
 }
 
 provider "cloudflare" {
-  api_token = var.cloudflare_api_token
+  api_token           = var.cloudflare_api_token
 }
 
 # Generate SSH keys
@@ -33,6 +42,16 @@ resource "local_file" "root_private_key" {
   content         = tls_private_key.root_key.private_key_openssh
   filename        = "${path.module}/selfai_ssh_key"
   file_permission = "0600"
+}
+
+# Generate temporary Tailscale auth key
+resource "tailscale_tailnet_key" "hourlykey" {
+  reusable      = true
+  ephemeral     = true
+  preauthorized = true
+  expiry        = 3600
+  description   = "Hourly key Terraform managed"
+  tags          = ["tag:server"]
 }
 
 resource "local_file" "root_public_key" {
@@ -70,6 +89,7 @@ module "frontend" {
 
   server_name              = "frontend"
   server_role              = "frontend"
+  tailnet_key              = tailscale_tailnet_key.hourlykey.key
   root_ssh_key_id          = hcloud_ssh_key.root_key.id
   root_private_key         = tls_private_key.root_key.private_key_openssh
 }

@@ -1,3 +1,5 @@
 hcloud_token          = "secret"
 cloudflare_api_token  = "secret"
 cloudflare_zone_id    = "secret"
+ts_client_token       = "secret"
+ts_client_secret      = "secret"

@@ -36,3 +36,9 @@ variable "root_ssh_key_id" {
   description = "ID of the root SSH key in Hetzner Cloud"
   type        = string
 }
+
+variable "tailnet_key" {
+  description = "Tailscale tailnet key for server authentication"
+  type        = string
+  sensitive   = true
+}
