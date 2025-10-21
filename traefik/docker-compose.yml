@@ -98,6 +98,7 @@ services:
       - "traefik.http.routers.hello2.middlewares=rate-limit@file"
       - "traefik.http.routers.hello2.middlewares=https-redirect@file"
       - "traefik.http.services.hello2.loadbalancer.server.port=80"
+      - "traefik.http.routers.hello2.middlewares=authentik-auth@docker"
     environment:
       CONTAINER_NAME: "hello-world-2"
 
