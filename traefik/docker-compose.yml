@@ -26,27 +26,28 @@ services:
     #  - "CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_key"
 
     environment:
-      - "CF_API_EMAIL=email@example.com"
-      - "CF_DNS_API_TOKEN=token"
+      - "CF_API_EMAIL="
+      - "CF_DNS_API_TOKEN="
+      - "CF_ZONE_NAME="
     labels:
       - "traefik.enable=true"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.traefik-http.entrypoints=web"
-      - "traefik.http.routers.traefik-http.rule=Host(`trfk.meco.cfd`)"
-      - "traefik.http.routers.traefik-http.middlewares=https-redirect@file"
-      # HTTPS Dashboard with auth
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`trfk.meco.cfd`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
-      - "traefik.http.routers.traefik-dashboard.tls=true"
-      - "traefik.http.routers.traefik-dashboard.tls.certResolver=letsencrypt"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      - "traefik.http.routers.traefik-dashboard.middlewares=traefik-auth@file,rate-limit@file"
-      #- "traefik.http.middlewares.traefik-auth.basicauth.users=trfkadm:password123" # Generate with htpasswd      
+      ## HTTP to HTTPS redirect
+      #- "traefik.http.routers.traefik-http.entrypoints=web"
+      #- "traefik.http.routers.traefik-http.rule=Host(`trfk.meco.cfd`)"
+      #- "traefik.http.routers.traefik-http.middlewares=https-redirect@file"
+      ## HTTPS Dashboard with auth
+      #- "traefik.http.routers.traefik-dashboard.rule=Host(`trfk.meco.cfd`)"
+      #- "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      #- "traefik.http.routers.traefik-dashboard.tls=true"
+      #- "traefik.http.routers.traefik-dashboard.tls.certResolver=letsencrypt"
+      #- "traefik.http.routers.traefik-dashboard.service=api@internal"
+      #- "traefik.http.routers.traefik-dashboard.middlewares=traefik-auth@file,rate-limit@file"
+      #- "traefik.http.middlewares.traefik-auth.basicauth.users=" # Generate with htpasswd
       ## Dashboard configuration
       ##- "traefik.http.routers.dashboard.rule=Host(`trfk.meco.cfd`)"
       ##- "traefik.http.routers.dashboard.service=api@internal"
       ##- "traefik.http.routers.dashboard.middlewares=auth"
-      ##- "traefik.http.middlewares.auth.basicauth.users=admin:password123" # Generate with htpasswd
+      ##- "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$xyz123" # Generate with htpasswd
       ### Metrics configuration
       ##- "traefik.http.routers.metrics.rule=Host(`traefik.yourdomain.com`) && PathPrefix(`/metrics`)"
       ##- "traefik.http.routers.metrics.service=prometheus@internal"
@@ -67,7 +68,7 @@ services:
       - selfai
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.hello1.rule=Host(`sub1.meco.cfd`)"
+      - "traefik.http.routers.hello1.rule=Host(`sub1.dev.meco.cfd`)"
       - "traefik.http.routers.hello1.entrypoints=websecure"
       - "traefik.http.routers.hello1.tls=true"
       - "traefik.http.routers.hello1.tls.certresolver=letsencrypt"
@@ -76,10 +77,10 @@ services:
       - "traefik.http.services.hello1.loadbalancer.server.port=80"
 
   hello-world-2:
-    #build:
-      #context: ./hello-world
-      #dockerfile: Dockerfile
-    image: traefik/whoami
+    build:
+      context: ./hello-world
+      dockerfile: Dockerfile
+      #image: traefik/whoami
     container_name: hello-world-2
     deploy:
       mode: replicated
@@ -90,13 +91,15 @@ services:
       - selfai
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.hello2.rule=Host(`sub2.meco.cfd`)"
+      - "traefik.http.routers.hello2.rule=Host(`sub2.dev.meco.cfd`)"
       - "traefik.http.routers.hello2.entrypoints=websecure"
       - "traefik.http.routers.hello2.tls=true"
       - "traefik.http.routers.hello2.tls.certresolver=letsencrypt"
       - "traefik.http.routers.hello2.middlewares=rate-limit@file"
       - "traefik.http.routers.hello2.middlewares=https-redirect@file"
       - "traefik.http.services.hello2.loadbalancer.server.port=80"
+    environment:
+      CONTAINER_NAME: "hello-world-2"
 
 networks:
   host:

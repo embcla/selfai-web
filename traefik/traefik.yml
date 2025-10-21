@@ -5,7 +5,7 @@ global:
 
 # API and Dashboard configuration
 api:
-  dashboard: true
+  dashboard: false
   insecure: false  # Set to true only for testing
 
 # Entrypoints configuration
@@ -22,7 +22,12 @@ entryPoints:
   websecure:
     address: ":443"
     http3: {}  # Enable HTTP/3
-
+    http:
+      tls:
+        domains:
+          - main: "meco.cfd"
+            sans:
+              - "*.dev.meco.cfd"
 
 # Providers configuration
 providers:
@@ -46,10 +51,12 @@ certificatesResolvers:
       email: "claude.carbone@gmail.com"
       storage: /certs/acme.json
       caServer: https://acme-v02.api.letsencrypt.org/directory # prod (default)
-      #caServer: https://acme-staging-v02.api.letsencrypt.org/directory # staging
-      dnsChallenge:
-        provider: cloudflare
-        delayBeforeCheck: 10
+        #caServer: https://acme-staging-v02.api.letsencrypt.org/directory # staging
+      httpChallenge:
+        entryPoint: web
+          #dnsChallenge:
+          #provider: cloudflare
+          #delayBeforeCheck: 10
         #resolvers:
         #  - "1.1.1.1:53"
         #  - "8.8.8.8:53"
@@ -63,8 +70,8 @@ log:
 #    defaultMode: keep
 #    names:
 #      ClientUsername: drop
-#  accessLog:
-#    filePath: "/var/log/traefik/access.log"
+accessLog:
+  filePath: "/var/log/access.log"
 #    format: json
 #    fields:
 #      defaultMode: keep
